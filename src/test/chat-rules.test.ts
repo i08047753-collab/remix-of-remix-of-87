@@ -1,0 +1,10 @@
+import { describe,it,expect } from 'vitest';
+import { chatFileSchema,chatSendSchema,validateChatBytes,mergeChatMessages,type ChatMessage } from '@/lib/chat-rules';
+describe('chat rules',()=>{
+ it('permits requested images, videos and documents',()=>{for(const [name,type] of [['a.jpg','image/jpeg'],['a.png','image/png'],['a.webp','image/webp'],['a.mp4','video/mp4'],['a.webm','video/webm'],['a.pdf','application/pdf'],['a.txt','text/plain']]) expect(chatFileSchema.safeParse({name,type,size:100}).success).toBe(true);});
+ it('blocks executable and mismatched uploads',()=>{expect(chatFileSchema.safeParse({name:'a.exe',type:'application/octet-stream',size:100}).success).toBe(false);expect(chatFileSchema.safeParse({name:'a.png',type:'video/mp4',size:100}).success).toBe(false);});
+ it('caps files at 20 MB',()=>{expect(chatFileSchema.safeParse({name:'a.mp4',type:'video/mp4',size:20*1024*1024}).success).toBe(true);expect(chatFileSchema.safeParse({name:'a.mp4',type:'video/mp4',size:20*1024*1024+1}).success).toBe(false);});
+ it('requires content and preserves emoji and multiline',()=>{const base={clientId:'12345678-1234-4234-8234-123456789012',attachmentId:null};expect(chatSendSchema.safeParse({...base,body:'\n'}).success).toBe(false);expect(chatSendSchema.parse({...base,body:'مرحبا 🌌\nكيف حالكم؟'}).body).toContain('\n');});
+ it('rejects forged media and binary text',()=>{expect(validateChatBytes(new TextEncoder().encode('not video'),'video/mp4')).toBe(false);expect(validateChatBytes(new Uint8Array([0,1,2]),'text/plain')).toBe(false);expect(validateChatBytes(new TextEncoder().encode('مرحبا'),'text/plain')).toBe(true);});
+ it('deduplicates realtime and send responses',()=>{const m={id:'a',created_at:'2026-10-24T12:00:00Z'} as ChatMessage;expect(mergeChatMessages([m],[m])).toHaveLength(1);});
+});

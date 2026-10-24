@@ -1,0 +1,10 @@
+# Content cleanup
+- [ ] Implement one authenticated real-time group chat with private validated media, history, and Arabic RTL presentation.
+- [ ] Verify chat text, media, persistence, realtime, and authorization through the live UI.
+- [x] Secure publishing: server-only access code verification, real signed-in users, posts/articles and admin approval.
+- [x] Add validated private image/file attachments without changing the publishing design.
+- [x] Add approved custom spam limits and verify wrong-code rejection, signed-out blocking, non-admin denial, approval-before-publication, attachment persistence, and submission cooldown. All 19 tests pass; isolated browser test data removed.
+- [ ] Assign a permanent administrator: blocked until the owner registers and identifies the account to grant this privilege.
+- [x] Inspect the project and available database connection: no database integration or managed database access found; no database changes made.
+- [x] Remove verified sample users, posts, and mock activity without changing user-created data.
+- [x] Verify empty states and preserved local user content: 12 tests passed; browser checks confirmed submission reload persistence, local profile preservation, and no runtime errors.

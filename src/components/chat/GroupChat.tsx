@@ -1,0 +1,79 @@
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Link } from '@tanstack/react-router';
+import { useServerFn } from '@tanstack/react-start';
+import { ArrowDown, Check, ChevronDown, FileText, LoaderCircle, Paperclip, Send, ShieldCheck, Smile, Sparkles, Telescope, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/lib/auth-context';
+import { supabase } from '@/integrations/supabase/client';
+import { CHAT_ACCEPT, chatFileSchema, chatSendSchema, fileSize, mergeChatMessages, type ChatMessage } from '@/lib/chat-rules';
+import { discardChatUpload, listChatMessages, prepareChatUpload, sendChatMessage, verifyChatUpload } from '@/lib/chat.functions';
+import { ChatMessageItem } from './ChatMessageItem';
+
+type PendingFile={file:File;preview:string;id?:string;status:'uploading'|'verifying'|'ready'|'failed';progress:number};
+export function GroupChat() {
+ const {user,ready}=useAuth();
+ const list=useServerFn(listChatMessages),send=useServerFn(sendChatMessage),prepare=useServerFn(prepareChatUpload),verify=useServerFn(verifyChatUpload),discard=useServerFn(discardChatUpload);
+ const [messages,setMessages]=useState<ChatMessage[]>([]),[loading,setLoading]=useState(false),[older,setOlder]=useState(false),[hasMore,setHasMore]=useState(false);
+ const [body,setBody]=useState(''),[sending,setSending]=useState(false),[error,setError]=useState(''),[connection,setConnection]=useState('connecting'),[pending,setPending]=useState<PendingFile|null>(null),[emoji,setEmoji]=useState(false),[unseen,setUnseen]=useState(false);
+ const scroller=useRef<HTMLDivElement>(null),fileInput=useRef<HTMLInputElement>(null),xhr=useRef<XMLHttpRequest|null>(null),generation=useRef(0),fileState=useRef<PendingFile|null>(null),nearBottom=useRef(true),scrollMode=useRef<'bottom'|'preserve'|null>('bottom'),oldHeight=useRef(0),retryId=useRef<string|null>(null),activeUser=useRef<string|null>(null);
+ const setFile=(v:PendingFile|null)=>{fileState.current=v;setPending(v);};
+ const merge=useCallback((incoming:ChatMessage[])=>{setMessages(current=>{const fresh=incoming.some(m=>!current.some(old=>old.id===m.id));if(fresh){if(nearBottom.current)scrollMode.current='bottom';else setUnseen(true);}return mergeChatMessages(current,incoming);});},[]);
+ const refresh=useCallback(async()=>{if(!user)return;const identity=user.id;const response=await list({data:{}});if(activeUser.current!==identity)return;merge(response.messages);setHasMore(response.hasMore);},[user,list,merge]);
+ useEffect(()=>{
+  activeUser.current=user?.id ?? null;setMessages([]);setHasMore(false);setError('');setBody('');retryId.current=null;scrollMode.current='bottom';nearBottom.current=true;setUnseen(false);
+  generation.current++;xhr.current?.abort();if(fileState.current?.preview)URL.revokeObjectURL(fileState.current.preview);setFile(null);
+  if(!user){setLoading(false);return;}
+  let active=true;setLoading(true);setConnection('connecting');
+  void refresh().catch(()=>{if(active)setError('تعذّر تحميل الرسائل. حاول مجدداً.');}).finally(()=>{if(active)setLoading(false);});
+  const channel=supabase.channel(`group-chat-${crypto.randomUUID()}`).on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages'},()=>{if(active)void refresh().catch(()=>setError('تعذّر استقبال الرسائل الجديدة.'));}).subscribe(status=>{if(active){setConnection(status==='SUBSCRIBED'?'connected':'connecting');if(status==='SUBSCRIBED')void refresh().catch(()=>{});}});
+  // Catch up after offline periods, and refresh short-lived private media links.
+  const interval=setInterval(()=>{if(active)void refresh().catch(()=>{});},60000);
+  const catchUp=()=>{if(active)void refresh().catch(()=>{});};window.addEventListener('online',catchUp);window.addEventListener('focus',catchUp);
+  return()=>{active=false;activeUser.current=null;generation.current++;xhr.current?.abort();if(fileState.current?.preview)URL.revokeObjectURL(fileState.current.preview);void supabase.removeChannel(channel);clearInterval(interval);window.removeEventListener('online',catchUp);window.removeEventListener('focus',catchUp);};
+ },[user?.id,refresh]);
+ useLayoutEffect(()=>{const el=scroller.current;if(!el)return;if(scrollMode.current==='bottom')el.scrollTop=el.scrollHeight;else if(scrollMode.current==='preserve')el.scrollTop+=el.scrollHeight-oldHeight.current;scrollMode.current=null;},[messages]);
+ const jump=()=>{const el=scroller.current;if(el){el.scrollTo({top:el.scrollHeight,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});nearBottom.current=true;setUnseen(false);}};
+ const loadOlder=async()=>{const first=messages[0];if(!first||older)return;setOlder(true);try{const response=await list({data:{before:{time:first.created_at,id:first.id}}});oldHeight.current=scroller.current?.scrollHeight ?? 0;scrollMode.current='preserve';setMessages(current=>mergeChatMessages(current,response.messages));setHasMore(response.hasMore);}catch{setError('تعذّر تحميل الرسائل الأقدم.');}finally{setOlder(false);}};
+ const cancelFile=()=>{generation.current++;xhr.current?.abort();const previous=fileState.current;if(previous?.preview)URL.revokeObjectURL(previous.preview);if(previous?.id)void discard({data:{id:previous.id}}).catch(()=>{});setFile(null);retryId.current=null;};
+ const upload=async(file:File)=>{
+  if(!chatFileSchema.safeParse({name:file.name,size:file.size,type:file.type}).success){setError('الملفات المسموحة: JPG، PNG، WebP، MP4، WebM، PDF، TXT. الحد الأقصى 20 MB.');return;}
+  cancelFile();setError('');const version=++generation.current;
+  const preview=file.type.startsWith('image/')?URL.createObjectURL(file):'';
+  const draft:PendingFile={file,preview,status:'uploading',progress:0};setFile(draft);
+  let uploadId:string|undefined;
+  try{
+   const ticket=await prepare({data:{name:file.name,size:file.size,type:file.type}});uploadId=ticket.id;
+   if(version!==generation.current){void discard({data:{id:ticket.id}}).catch(()=>{});return;}
+   setFile({...draft,id:ticket.id});
+   await new Promise<void>((resolve,reject)=>{const request=new XMLHttpRequest();xhr.current=request;request.open('PUT',ticket.url);request.setRequestHeader('Content-Type',file.type);request.setRequestHeader('x-upsert','false');request.upload.onprogress=e=>{if(version===generation.current&&e.lengthComputable)setFile({...draft,id:ticket.id,progress:Math.round(e.loaded/e.total*100)});};request.onload=()=>request.status>=200&&request.status<300?resolve():reject(new Error('تعذّر رفع الملف. حاول مجدداً.'));request.onerror=()=>reject(new Error('انقطع الاتصال أثناء الرفع.'));request.onabort=()=>reject(new Error('CANCELLED'));request.send(file);});
+   if(version!==generation.current)return;
+   setFile({...draft,id:ticket.id,status:'verifying',progress:100});await verify({data:{id:ticket.id}});
+   if(version===generation.current)setFile({...draft,id:ticket.id,status:'ready',progress:100});
+  }catch(e){if(version===generation.current){setFile({...draft,...(uploadId?{id:uploadId}:{}),status:'failed',progress:0});setError(e instanceof Error?e.message:'تعذّر رفع الملف.');}if(uploadId)void discard({data:{id:uploadId}}).catch(()=>{});}
+ };
+ const submit=async()=>{
+  if(sending||!user||pending&&pending.status!=='ready')return;
+  const clientId=retryId.current ?? crypto.randomUUID();retryId.current=clientId;
+  const data={clientId,body,attachmentId:pending?.id ?? null};if(!chatSendSchema.safeParse(data).success){setError('اكتب رسالة أو أرفق ملفاً. الحد الأقصى 4000 حرف.');return;}
+  setSending(true);setError('');const identity=user.id;
+  try{const result=await send({data});const response=await list({data:{ids:[result.id]}});if(activeUser.current!==identity)return;nearBottom.current=true;scrollMode.current='bottom';merge(response.messages);setBody('');retryId.current=null;if(fileState.current?.preview)URL.revokeObjectURL(fileState.current.preview);setFile(null);setUnseen(false);}catch(e){setError(e instanceof Error?e.message:'تعذّر إرسال الرسالة. حاول مجدداً.');}finally{setSending(false);}
+ };
+ return <div className="mx-auto max-w-5xl">
+  <div className="mb-5 flex items-center justify-between gap-3"><div><p className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-storm"><Sparkles className="size-3.5"/>STORM WORLD</p><h1 className="text-2xl font-bold sm:text-3xl">الدردشة الجماعية</h1></div><Button asChild variant="ghost" size="sm"><Link to="/rooms">كل الغرف<ChevronDown className="size-4"/></Link></Button></div>
+  <section className="flex h-[calc(100dvh-16rem)] min-h-[440px] max-h-[900px] flex-col overflow-hidden rounded-2xl border border-border bg-card/80 shadow-card sm:min-h-[520px]" aria-label="الدردشة الجماعية">
+   <header className="flex shrink-0 items-center gap-3 border-b border-border bg-card/90 px-4 py-3 sm:px-6"><span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary"><Telescope className="size-6"/></span><div className="min-w-0 flex-1"><h2 className="font-semibold">ملتقى محبّي العلوم والفضاء</h2><p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground"><span className={`size-1.5 rounded-full ${user&&connection==='connected'?'bg-success':'bg-warning'}`}/>{!user?'للأعضاء المسجّلين':connection==='connected'?'متصل · دردشة مباشرة':'جارٍ الاتصال…'}</p></div><ShieldCheck className="size-5 shrink-0 text-storm" aria-label="دردشة للأعضاء فقط"/></header>
+   <div ref={scroller} onLoadCapture={()=>{const el=scroller.current;if(el&&nearBottom.current)el.scrollTop=el.scrollHeight;}} onScroll={()=>{const el=scroller.current;if(el){nearBottom.current=el.scrollHeight-el.scrollTop-el.clientHeight<100;if(nearBottom.current)setUnseen(false);}}} className="starfield relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-5 sm:px-6" aria-busy={loading}>
+    {!ready||loading?<div className="grid h-full place-content-center text-center text-muted-foreground"><LoaderCircle className="mx-auto mb-3 size-7 animate-spin text-primary"/><p className="text-sm">جارٍ تحميل الدردشة…</p></div>:!user?<div className="flex h-full flex-col items-center justify-center gap-4 text-center"><Telescope className="size-14 text-primary"/><h3 className="text-xl font-semibold">مساحة تجمع شغفنا بالكون</h3><p className="max-w-xs text-sm text-muted-foreground">سجّل دخولك للمشاركة في الدردشة الجماعية.</p><Button asChild variant="hero"><Link to="/auth">تسجيل الدخول</Link></Button></div>:messages.length===0?<div className="flex h-full flex-col items-center justify-center gap-3 text-center"><span className="grid size-20 place-items-center rounded-full border border-primary/20 bg-primary/10"><Telescope className="size-10 text-primary"/></span><h3 className="mt-2 text-xl font-semibold">كل اكتشاف يبدأ بسؤال</h3><p className="max-w-xs text-sm leading-7 text-muted-foreground">لا توجد رسائل بعد. كن أول من يبدأ حديثاً عن العلوم والفضاء 🌌</p></div>:<>{hasMore&&<div className="mb-5 text-center"><Button variant="outline" size="sm" disabled={older} onClick={()=>void loadOlder()}>{older&&<LoaderCircle className="size-4 animate-spin"/>}رسائل أقدم</Button></div>}<ol className="space-y-5" aria-label="الرسائل">{messages.map((m,i)=><div key={m.id}>{(i===0||m.created_at.slice(0,10)!==messages[i-1]?.created_at.slice(0,10))&&<div className="mb-5 text-center"><span className="rounded-full border border-border bg-background/80 px-3 py-1 text-[10px] text-muted-foreground">{new Date(m.created_at).toLocaleDateString('ar-DZ',{day:'numeric',month:'long'})}</span></div>}<ChatMessageItem message={m} own={m.sender_id===user.id}/></div>)}</ol></>}
+   </div>
+   {unseen&&<div className="-mt-10 mb-2 flex justify-center"><Button size="sm" variant="soft" className="z-10 rounded-full shadow-card" onClick={jump}><ArrowDown className="size-4"/>رسائل جديدة</Button></div>}
+   <footer className="shrink-0 border-t border-border bg-card px-3 py-3 sm:px-5">
+    {error&&<div role="alert" className="mb-3 flex items-start gap-2 rounded-lg bg-destructive/10 p-3 text-xs text-destructive"><p className="min-w-0 flex-1 break-words">{error}</p><Button variant="ghost" size="icon" className="size-5 shrink-0" aria-label="إغلاق التنبيه" onClick={()=>setError('')}><X className="size-3"/></Button>{!loading&&messages.length===0&&user&&<Button variant="ghost" size="sm" onClick={()=>void refresh().then(()=>setError('')).catch(()=>{})}>إعادة المحاولة</Button>}</div>}
+    {pending&&<div className="mb-3 flex items-center gap-3 rounded-lg border border-border bg-muted/50 p-2">{pending.preview?<img src={pending.preview} alt="معاينة المرفق" className="size-14 rounded-md object-cover"/>:<FileText className="m-2 size-9 shrink-0 text-storm"/>}<div className="min-w-0 flex-1"><p className="truncate text-xs font-medium">{pending.file.name}</p><p className="mt-1 text-[10px] text-muted-foreground">{fileSize(pending.file.size)} · {pending.status==='ready'?'جاهز للإرسال':pending.status==='verifying'?'جارٍ التحقق من الملف…':pending.status==='failed'?'فشل الرفع':`جارٍ الرفع ${pending.progress}٪`}</p>{pending.status==='uploading'&&<progress value={pending.progress} max={100} className="mt-1 h-1 w-full accent-primary" aria-label="تقدم رفع الملف"/>}</div>{pending.status==='ready'&&<Check className="size-4 text-success"/>}{pending.status==='failed'&&<Button variant="outline" size="sm" onClick={()=>void upload(pending.file)}>إعادة الرفع</Button>}<Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={sending} onClick={cancelFile} aria-label="إلغاء المرفق"><X className="size-4"/></Button></div>}
+    {emoji&&<div className="mb-2 flex flex-wrap gap-1">{['🌌','🔭','✨','🚀','🌍','🪐','💡','😊','❤️','👍'].map(e=><Button key={e} variant="ghost" size="icon" className="size-9 text-xl" disabled={sending} aria-label={`إضافة ${e}`} onClick={()=>{setBody(v=>v+e);retryId.current=null;setEmoji(false);}}>{e}</Button>)}</div>}
+    <form onSubmit={e=>{e.preventDefault();void submit();}} className="flex items-end gap-2"><input type="file" ref={fileInput} accept={CHAT_ACCEPT} className="hidden" aria-label="اختيار مرفق" onChange={e=>{const f=e.target.files?.[0];e.target.value='';if(f)void upload(f);}}/><div className="flex min-w-0 flex-1 items-end rounded-xl border border-input bg-background p-1 focus-within:ring-2 focus-within:ring-ring/30"><Button variant="ghost" size="icon" className="size-10 shrink-0 text-muted-foreground" title="إرفاق ملف" aria-label="إرفاق ملف" disabled={!user||sending||!!pending} onClick={()=>fileInput.current?.click()}><Paperclip className="size-5"/></Button><Textarea aria-label="نص الرسالة" placeholder={user?'شارك سؤالاً، فكرة، أو اكتشافاً…':'سجّل دخولك للمشاركة…'} value={body} maxLength={4000} disabled={!user||sending} onChange={e=>{setBody(e.target.value);retryId.current=null;}} className="max-h-32 min-h-10 resize-none border-0 bg-transparent px-1 py-2 text-sm shadow-none focus-visible:ring-0" rows={1} dir="auto"/><Button variant="ghost" size="icon" className="size-10 shrink-0 text-muted-foreground" title="إضافة رمز تعبيري" aria-label="رموز تعبيرية" disabled={!user||sending} onClick={()=>setEmoji(v=>!v)}><Smile className="size-5"/></Button></div><Button type="submit" variant="hero" size="icon" className="size-12 shrink-0 rounded-xl" disabled={!user||sending||(!body.trim()&&!pending)||!!pending&&pending.status!=='ready'} aria-label="إرسال الرسالة">{sending?<LoaderCircle className="size-5 animate-spin"/>:<Send className="size-5"/>}</Button></form>
+    <div className="mt-2 flex justify-between text-[10px] text-muted-foreground"><span>{sending?'جارٍ إرسال الرسالة…':'مجتمع واحد، واحترام يجمعنا'}</span>{body.length>3500&&<span>{body.length}/4000</span>}</div>
+   </footer>
+  </section>
+ </div>;
+}
