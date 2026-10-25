@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SiteRouteImport } from './routes/_site'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthResetRouteImport } from './routes/auth-reset'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as SiteAdminRouteImport } from './routes/_site.admin'
 import { Route as SiteChatRouteImport } from './routes/_site.chat'
@@ -39,11 +38,6 @@ const SiteRoute = SiteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthResetRoute = AuthResetRouteImport.update({
-  id: '/auth-reset',
-  path: '/auth-reset',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -115,7 +109,6 @@ const SiteUUsernameRoute = SiteUUsernameRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/auth-reset': typeof AuthResetRoute
   '/onboarding': typeof OnboardingRoute
   '/admin': typeof SiteAdminRoute
   '/chat': typeof SiteChatRoute
@@ -133,7 +126,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/auth-reset': typeof AuthResetRoute
   '/onboarding': typeof OnboardingRoute
   '/admin': typeof SiteAdminRoute
   '/chat': typeof SiteChatRoute
@@ -153,7 +145,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_site': typeof SiteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/auth-reset': typeof AuthResetRoute
   '/onboarding': typeof OnboardingRoute
   '/_site/admin': typeof SiteAdminRoute
   '/_site/chat': typeof SiteChatRoute
@@ -173,7 +164,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/auth-reset'
     | '/onboarding'
     | '/admin'
     | '/chat'
@@ -191,7 +181,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
-    | '/auth-reset'
     | '/onboarding'
     | '/admin'
     | '/chat'
@@ -210,7 +199,6 @@ export interface FileRouteTypes {
     | '/'
     | '/_site'
     | '/auth'
-    | '/auth-reset'
     | '/onboarding'
     | '/_site/admin'
     | '/_site/chat'
@@ -230,7 +218,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SiteRoute: typeof SiteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  AuthResetRoute: typeof AuthResetRoute
   OnboardingRoute: typeof OnboardingRoute
 }
 
@@ -255,13 +242,6 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth-reset': {
-      id: '/auth-reset'
-      path: '/auth-reset'
-      fullPath: '/auth-reset'
-      preLoaderRoute: typeof AuthResetRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -394,7 +374,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SiteRoute: SiteRouteWithChildren,
   AuthRoute: AuthRoute,
-  AuthResetRoute: AuthResetRoute,
   OnboardingRoute: OnboardingRoute,
 }
 export const routeTree = rootRouteImport

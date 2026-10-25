@@ -58,8 +58,9 @@ export const sendChatMessage=createServerFn({method:'POST'}).middleware([require
   if(verified.error || !verified.data.user) throw new Error('سجّل الدخول لإرسال رسالة.');
   const user=verified.data.user;
   const metadata=user.user_metadata;
-  const name=[metadata['username'],metadata['preferred_username'],metadata['full_name'],metadata['name']].find(v=>typeof v==='string' && v.trim());
-  const username=typeof name==='string' ? name.trim().slice(0,80) : `عضو ${user.id.slice(0,8)}`;
+  // Display names come from the server-owned username mapping; user metadata is self-editable.
+  const mapped=await context.supabase.from('account_usernames').select('username').eq('user_id',context.userId).maybeSingle();
+  const username=mapped.data?.username ?? `عضو ${user.id.slice(0,8)}`;
   const candidate=metadata['avatar_url'] ?? metadata['picture'];
   let avatar:string|null=null;
   if(typeof candidate==='string') { try { if(new URL(candidate).protocol==='https:') avatar=candidate; } catch { /* no avatar */ } }
