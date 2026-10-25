@@ -9,3 +9,4 @@
 - [x] Remove verified sample users, posts, and mock activity without changing user-created data.
 - [x] Verify empty states and preserved local user content: 12 tests passed; browser checks confirmed submission reload persistence, local profile preservation, and no runtime errors.
 - [x] Username/password accounts (register, login, logout), social sign-in removed, Arabic errors; verified end-to-end in the live preview and test account removed.
+- [x] Auth review: locked server-only database actions (moderation, posting, chat) away from direct visitor calls; re-verified register, duplicate, mismatch, wrong password, login, logout, non-admin denial.

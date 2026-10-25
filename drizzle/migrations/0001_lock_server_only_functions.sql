@@ -1,0 +1,14 @@
+REVOKE EXECUTE ON FUNCTION public.moderate_publishing_content(uuid, uuid, text, text) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.create_publishing_content(uuid, text, text, text, text, text, jsonb) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.reserve_publishing_attempt(uuid) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.send_chat_message(uuid, uuid, text, text, text, uuid) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.claim_chat_upload(uuid, uuid, text) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.cancel_chat_upload(uuid, uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.moderate_publishing_content(uuid, uuid, text, text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.create_publishing_content(uuid, text, text, text, text, text, jsonb) TO service_role;
+GRANT EXECUTE ON FUNCTION public.reserve_publishing_attempt(uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.send_chat_message(uuid, uuid, text, text, text, uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.claim_chat_upload(uuid, uuid, text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.cancel_chat_upload(uuid, uuid) TO service_role;
+REVOKE EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) TO authenticated, service_role;
