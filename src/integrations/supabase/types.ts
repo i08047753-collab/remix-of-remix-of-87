@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_usernames: {
+        Row: {
+          created_at: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      auth_rate_events: {
+        Row: {
+          created_at: string
+          id: string
+          key_hash: string
+          kind: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key_hash: string
+          kind: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key_hash?: string
+          kind?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           attachment_id: string | null
@@ -186,6 +225,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auth_rate_allowed: {
+        Args: {
+          p_key: string
+          p_kind: string
+          p_limit: number
+          p_window_seconds: number
+        }
+        Returns: boolean
+      }
+      auth_rate_record: {
+        Args: { p_key: string; p_kind: string }
+        Returns: undefined
+      }
       cancel_chat_upload: {
         Args: { p_id: string; p_user: string }
         Returns: string
