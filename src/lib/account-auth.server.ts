@@ -2,8 +2,11 @@ import { createClient } from '@supabase/supabase-js';
 import { getRequestHeader } from '@tanstack/react-start/server';
 import type { Database } from '@/integrations/supabase/types';
 
-/** Accounts are keyed by an internal address nobody sees or types; usernames map to it server-side. */
-export const internalAccountEmail = () => `${crypto.randomUUID()}@accounts.stormworld.app`;
+/**
+ * Accounts are keyed by a random internal address nobody sees or types; usernames map to it
+ * server-side. The reserved .invalid domain guarantees no mail can ever be delivered for it.
+ */
+export const internalAccountEmail = () => `${crypto.randomUUID()}@accounts.storm-world.invalid`;
 
 async function sha256(value: string) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
