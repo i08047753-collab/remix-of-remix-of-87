@@ -8,3 +8,4 @@
 - [x] Inspect the project and available database connection: no database integration or managed database access found; no database changes made.
 - [x] Remove verified sample users, posts, and mock activity without changing user-created data.
 - [x] Verify empty states and preserved local user content: 12 tests passed; browser checks confirmed submission reload persistence, local profile preservation, and no runtime errors.
+- [x] Username/password accounts (register, login, logout), social sign-in removed, Arabic errors; verified end-to-end in the live preview and test account removed.
