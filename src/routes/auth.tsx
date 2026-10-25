@@ -18,7 +18,7 @@ function AuthPage(){
  const {user}=useAuth(); const navigate=useNavigate();
  const signIn=useServerFn(signInWithUsername); const register=useServerFn(registerWithUsername);
  const [mode,setMode]=useState<'login'|'signup'>('login');const [username,setUsername]=useState('');const [password,setPassword]=useState('');const [confirm,setConfirm]=useState('');const [busy,setBusy]=useState(false);
- const [error,setError]=useState<{field?:RegistrationField;message:string}|null>(null);
+ const [error,setError]=useState<{field?:RegistrationField|undefined;message:string}|null>(null);
  useEffect(()=>{if(user)void navigate({to:'/submit',replace:true});},[user,navigate]);
  const switchMode=()=>{setMode(mode==='signup'?'login':'signup');setError(null);setPassword('');setConfirm('');};
  const submit=async(e:React.FormEvent)=>{e.preventDefault();if(busy)return;setError(null);
