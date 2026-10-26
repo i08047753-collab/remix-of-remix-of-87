@@ -130,6 +130,71 @@ export type Database = {
         }
         Relationships: []
       }
+      dm_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string
+          read_a: string
+          read_b: string
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          read_a?: string
+          read_b?: string
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          read_a?: string
+          read_b?: string
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
+      dm_messages: {
+        Row: {
+          body: string
+          client_id: string
+          conversation_id: string
+          created_at: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          client_id: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          client_id?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dm_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "dm_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       publishing_attempts: {
         Row: {
           created_at: string
@@ -258,6 +323,33 @@ export type Database = {
         }
         Returns: string
       }
+      dm_inbox: {
+        Args: { p_user: string }
+        Returns: {
+          id: string
+          last_at: string
+          last_body: string
+          last_sender: string
+          other_id: string
+          other_read_at: string
+          other_username: string
+          unread: number
+        }[]
+      }
+      dm_mark_read: {
+        Args: { p_conversation: string; p_user: string }
+        Returns: undefined
+      }
+      dm_send: {
+        Args: {
+          p_body: string
+          p_client: string
+          p_conversation: string
+          p_user: string
+        }
+        Returns: string
+      }
+      dm_start: { Args: { p_other: string; p_user: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
