@@ -18,6 +18,7 @@ import { Route as SiteChatRouteImport } from './routes/_site.chat'
 import { Route as SiteExploreRouteImport } from './routes/_site.explore'
 import { Route as SiteFeedRouteImport } from './routes/_site.feed'
 import { Route as SiteMeRouteImport } from './routes/_site.me'
+import { Route as SiteMessagesRouteImport } from './routes/_site.messages'
 import { Route as SiteRulesRouteImport } from './routes/_site.rules'
 import { Route as SiteSettingsRouteImport } from './routes/_site.settings'
 import { Route as SiteStatusRouteImport } from './routes/_site.status'
@@ -70,6 +71,11 @@ const SiteMeRoute = SiteMeRouteImport.update({
   path: '/me',
   getParentRoute: () => SiteRoute,
 } as any)
+const SiteMessagesRoute = SiteMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => SiteRoute,
+} as any)
 const SiteRulesRoute = SiteRulesRouteImport.update({
   id: '/rules',
   path: '/rules',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/explore': typeof SiteExploreRoute
   '/feed': typeof SiteFeedRoute
   '/me': typeof SiteMeRoute
+  '/messages': typeof SiteMessagesRoute
   '/rules': typeof SiteRulesRoute
   '/settings': typeof SiteSettingsRoute
   '/status': typeof SiteStatusRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/explore': typeof SiteExploreRoute
   '/feed': typeof SiteFeedRoute
   '/me': typeof SiteMeRoute
+  '/messages': typeof SiteMessagesRoute
   '/rules': typeof SiteRulesRoute
   '/settings': typeof SiteSettingsRoute
   '/status': typeof SiteStatusRoute
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/_site/explore': typeof SiteExploreRoute
   '/_site/feed': typeof SiteFeedRoute
   '/_site/me': typeof SiteMeRoute
+  '/_site/messages': typeof SiteMessagesRoute
   '/_site/rules': typeof SiteRulesRoute
   '/_site/settings': typeof SiteSettingsRoute
   '/_site/status': typeof SiteStatusRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/feed'
     | '/me'
+    | '/messages'
     | '/rules'
     | '/settings'
     | '/status'
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/feed'
     | '/me'
+    | '/messages'
     | '/rules'
     | '/settings'
     | '/status'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/_site/explore'
     | '/_site/feed'
     | '/_site/me'
+    | '/_site/messages'
     | '/_site/rules'
     | '/_site/settings'
     | '/_site/status'
@@ -286,6 +298,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteMeRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/messages': {
+      id: '/_site/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof SiteMessagesRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/rules': {
       id: '/_site/rules'
       path: '/rules'
@@ -344,6 +363,7 @@ interface SiteRouteChildren {
   SiteExploreRoute: typeof SiteExploreRoute
   SiteFeedRoute: typeof SiteFeedRoute
   SiteMeRoute: typeof SiteMeRoute
+  SiteMessagesRoute: typeof SiteMessagesRoute
   SiteRulesRoute: typeof SiteRulesRoute
   SiteSettingsRoute: typeof SiteSettingsRoute
   SiteStatusRoute: typeof SiteStatusRoute
@@ -359,6 +379,7 @@ const SiteRouteChildren: SiteRouteChildren = {
   SiteExploreRoute: SiteExploreRoute,
   SiteFeedRoute: SiteFeedRoute,
   SiteMeRoute: SiteMeRoute,
+  SiteMessagesRoute: SiteMessagesRoute,
   SiteRulesRoute: SiteRulesRoute,
   SiteSettingsRoute: SiteSettingsRoute,
   SiteStatusRoute: SiteStatusRoute,

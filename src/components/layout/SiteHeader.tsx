@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Compass, Home, MessagesSquare, PenSquare, ShieldCheck, UserRound, Info } from "lucide-react";
+import { Compass, Home, Mail, MessagesSquare, PenSquare, ShieldCheck, UserRound, Info } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/common/ThemeControls";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ const NAV = [
   { to: "/feed", label: "الرئيسية", icon: Home },
   { to: "/explore", label: "استكشف", icon: Compass },
   { to: "/chat", label: "الدردشة", icon: MessagesSquare },
+  { to: "/messages", label: "الرسائل", icon: Mail },
   { to: "/rules", label: "قواعد المجتمع", icon: ShieldCheck },
 ] as const;
 
@@ -73,6 +74,7 @@ const MOBILE = [
   { to: "/explore", label: "استكشف", icon: Compass },
   { to: "/submit", label: "اقترح", icon: PenSquare },
   { to: "/chat", label: "الدردشة", icon: MessagesSquare },
+  { to: "/messages", label: "الرسائل", icon: Mail },
   { to: "/me", label: "حسابي", icon: UserRound },
 ] as const;
 
@@ -82,7 +84,7 @@ export function MobileNav() {
       aria-label="التنقل السفلي"
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
     >
-      <ul className="mx-auto grid max-w-md grid-cols-5">
+      <ul className="mx-auto grid max-w-md grid-cols-6">
         {MOBILE.map((n) => (
           <li key={n.to}>
             <Link
