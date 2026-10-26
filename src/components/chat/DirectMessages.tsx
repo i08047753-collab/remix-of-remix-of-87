@@ -20,7 +20,7 @@ function shortTime(iso: string) {
   return d.toDateString() === new Date().toDateString() ? timeFmt.format(d) : dayFmt.format(d);
 }
 
-export function DirectMessages({ activeId }: { activeId?: string }) {
+export function DirectMessages({ activeId }: { activeId?: string | undefined }) {
   const { user, ready } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -134,7 +134,7 @@ function MemberSearch({ onOpen }: { onOpen: (id: string) => void }) {
   </div>;
 }
 
-function Thread({ id, userId, fallbackName }: { id: string; userId: string; fallbackName?: string }) {
+function Thread({ id, userId, fallbackName }: { id: string; userId: string; fallbackName?: string | undefined }) {
   const queryClient = useQueryClient();
   const fetchThread = useServerFn(listThread);
   const send = useServerFn(sendDirectMessage);
