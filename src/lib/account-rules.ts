@@ -40,3 +40,6 @@ export function validateRegistration(input: { username: unknown; password: unkno
   if (password !== confirm) return { ok: false, field: 'confirm', error: AUTH_MESSAGES.passwordMismatch };
   return { ok: true, username: name.value };
 }
+
+/** Only a definite rejection from the auth server ends a stored session; network blips must not sign members out. */
+export const sessionRejected = (status: number | undefined) => status === 401 || status === 403;

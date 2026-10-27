@@ -23,7 +23,7 @@ const navLinkClass =
 
 export function SiteHeader() {
   const [profile] = useProfile();
-  const { user } = useAuth();
+  const { user, ready } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   return (
@@ -53,7 +53,7 @@ export function SiteHeader() {
             </Link>
           </Button>
           <ThemeToggle />
-          {user ? <Button variant="ghost" size="sm" onClick={async () => { await queryClient.cancelQueries(); queryClient.clear(); await supabase.auth.signOut(); await navigate({ to: "/auth", replace: true }); }}>خروج</Button> : <Button asChild variant="ghost" size="sm"><Link to="/auth">دخول</Link></Button>}
+          {!ready ? <Button variant="ghost" size="sm" className="invisible" aria-hidden tabIndex={-1}>دخول</Button> : user ? <Button variant="ghost" size="sm" onClick={async () => { await queryClient.cancelQueries(); queryClient.clear(); await supabase.auth.signOut(); await navigate({ to: "/auth", replace: true }); }}>خروج</Button> : <Button asChild variant="ghost" size="sm"><Link to="/auth">دخول</Link></Button>}
           <Link to="/me" aria-label="حسابي" className="rounded-full ring-offset-2 ring-offset-background hover:ring-2 hover:ring-primary">
             {profile ? (
               <MemberAvatar name={profile.username} seed={profile.username} className="size-9" />
