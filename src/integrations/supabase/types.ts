@@ -160,12 +160,39 @@ export type Database = {
         }
         Relationships: []
       }
+      dm_hidden_messages: {
+        Row: {
+          created_at: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dm_hidden_messages_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "dm_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dm_messages: {
         Row: {
           body: string
           client_id: string
           conversation_id: string
           created_at: string
+          deleted_at: string | null
           id: string
           sender_id: string
         }
@@ -174,6 +201,7 @@ export type Database = {
           client_id: string
           conversation_id: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           sender_id: string
         }
@@ -182,6 +210,7 @@ export type Database = {
           client_id?: string
           conversation_id?: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           sender_id?: string
         }
@@ -323,12 +352,17 @@ export type Database = {
         }
         Returns: string
       }
+      dm_delete: {
+        Args: { p_message: string; p_scope: string; p_user: string }
+        Returns: undefined
+      }
       dm_inbox: {
         Args: { p_user: string }
         Returns: {
           id: string
           last_at: string
           last_body: string
+          last_deleted: boolean
           last_sender: string
           other_id: string
           other_read_at: string
