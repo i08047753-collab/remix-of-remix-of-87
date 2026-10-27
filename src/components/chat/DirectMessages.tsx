@@ -2,15 +2,16 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowRight, CheckCheck, Check, LoaderCircle, MessageCircle, Search, Send, X } from 'lucide-react';
+import { ArrowRight, Ban, CheckCheck, Check, Languages, LoaderCircle, MessageCircle, Search, Send, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { MemberAvatar } from '@/components/common/MemberAvatar';
 import { useAuth } from '@/lib/auth-context';
 import { supabase } from '@/integrations/supabase/client';
-import { DM_MAX_LENGTH, mergeDmMessages, type DmMessage } from '@/lib/dm-rules';
-import { listInbox, listThread, searchMembers, sendDirectMessage, startConversation } from '@/lib/dm.functions';
+import { DM_MAX_LENGTH, canDeleteForEveryone, mergeDmMessages, type DmMessage } from '@/lib/dm-rules';
+import { deleteDirectMessage, listInbox, listThread, searchMembers, sendDirectMessage, startConversation, translateDirectMessage } from '@/lib/dm.functions';
 import { cn } from '@/lib/utils';
 
 const timeFmt = new Intl.DateTimeFormat('ar', { hour: '2-digit', minute: '2-digit' });
@@ -31,7 +32,7 @@ export function DirectMessages({ activeId }: { activeId?: string | undefined }) 
     if (!user) return;
     // Row security means each member only receives inserts from their own conversations.
     const channel = supabase.channel(`dm-${crypto.randomUUID()}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'dm_messages' }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'dm_messages' }, () => {
         void queryClient.invalidateQueries({ queryKey: ['dm-inbox'] });
         void queryClient.invalidateQueries({ queryKey: ['dm-thread'] });
       }).subscribe();
@@ -67,7 +68,7 @@ export function DirectMessages({ activeId }: { activeId?: string | undefined }) 
               </span>
               <span className="mt-0.5 flex items-center gap-2">
                 <span className={cn('min-w-0 flex-1 truncate text-xs', c.unread ? 'font-semibold text-foreground' : 'text-muted-foreground')}>
-                  {c.lastBody ? `${c.lastSender === user.id ? 'أنت: ' : ''}${c.lastBody}` : 'محادثة جديدة'}
+                  {c.lastDeleted ? 'تم حذف هذه الرسالة' : c.lastBody ? `${c.lastSender === user.id ? 'أنت: ' : ''}${c.lastBody}` : 'محادثة جديدة'}
                 </span>
                 {c.unread > 0 && <span className="grid min-w-5 place-items-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground" aria-label={`${c.unread} رسائل غير مقروءة`}>{c.unread > 99 ? '99+' : c.unread}</span>}
               </span>
