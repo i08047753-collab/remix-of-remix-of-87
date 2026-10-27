@@ -10,3 +10,4 @@
 - [x] Verify empty states and preserved local user content: 12 tests passed; browser checks confirmed submission reload persistence, local profile preservation, and no runtime errors.
 - [x] Username/password accounts (register, login, logout), social sign-in removed, Arabic errors; verified end-to-end in the live preview and test account removed.
 - [x] Auth review: locked server-only database actions (moderation, posting, chat) away from direct visitor calls; re-verified register, duplicate, mismatch, wrong password, login, logout, non-admin denial.
+- [x] Keep members signed in across refresh and browser restart until sign-out or session expiry; verified in the preview, test accounts removed.
