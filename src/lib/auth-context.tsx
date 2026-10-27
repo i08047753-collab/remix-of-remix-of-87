@@ -3,10 +3,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from '@tanstack/react-router';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { sessionRejected } from './account-rules';
 const AuthContext=createContext<{user:User|null;ready:boolean}>({user:null,ready:false});
 export const useAuth=()=>useContext(AuthContext);
-/** Only a definite rejection from the auth server ends a stored session; network blips must not sign members out. */
-export const sessionRejected=(status:number|undefined)=>status===401||status===403;
 export function AuthProvider({children}:{children:ReactNode}) {
  const [user,setUser]=useState<User|null>(null); const [ready,setReady]=useState(false);
  const queryClient=useQueryClient(); const router=useRouter();

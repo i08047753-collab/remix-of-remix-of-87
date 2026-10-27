@@ -30,3 +30,16 @@ describe('registration rules', () => {
     expect(AUTH_MESSAGES.invalidCredentials).toBe('اسم المستخدم أو كلمة المرور غير صحيحة.');
   });
 });
+
+import { sessionRejected } from '@/lib/account-rules';
+describe('saved session', () => {
+  it('ends the session only when the server rejects it', () => {
+    expect(sessionRejected(401)).toBe(true);
+    expect(sessionRejected(403)).toBe(true);
+  });
+  it('keeps the member signed in on network or server hiccups', () => {
+    expect(sessionRejected(undefined)).toBe(false);
+    expect(sessionRejected(0)).toBe(false);
+    expect(sessionRejected(500)).toBe(false);
+  });
+});
