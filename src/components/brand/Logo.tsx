@@ -1,19 +1,16 @@
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+import logoAsset from "@/assets/storm-logo.png.asset.json";
 
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 40 40" className={cn("size-9", className)} aria-hidden="true">
-      <defs>
-        <linearGradient id="sw-g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="var(--primary)" />
-          <stop offset="100%" stopColor="var(--storm)" />
-        </linearGradient>
-      </defs>
-      <circle cx="20" cy="20" r="18" fill="none" stroke="url(#sw-g)" strokeWidth="2" opacity="0.5" />
-      <ellipse cx="20" cy="20" rx="18" ry="7" fill="none" stroke="url(#sw-g)" strokeWidth="1.6" transform="rotate(-25 20 20)" />
-      <path d="M22.5 7 L13 22 h6.5 L16.5 33 L27 17 h-6.5 Z" fill="url(#sw-g)" />
-    </svg>
+    <img
+      src={logoAsset.url}
+      alt=""
+      width={512}
+      height={512}
+      className={cn("size-9 shrink-0 rounded-[22%] object-cover", className)}
+    />
   );
 }
 
