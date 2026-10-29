@@ -283,12 +283,7 @@
   }
 }
 
-/* Globally hide anything with the id "lovable-badge" (injected badge). */
-#lovable-badge,
-#lovable-badge * {
+/* إخفاء شارة "Edit with Lovable" المُدرَجة تلقائياً. */
+#lovable-badge {
   display: none !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-  pointer-events: none !important;
 }
