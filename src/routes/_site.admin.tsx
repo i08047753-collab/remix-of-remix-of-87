@@ -14,6 +14,7 @@ import { CATEGORIES } from "@/data/catalog";
 import { MEMBERS, REPORTS, REVIEW_QUEUE, memberByUsername, type ModerationItem } from "@/data/sample";
 import { cn } from "@/lib/utils";
 import { PublishingReview } from "@/components/common/PublishingReview";
+import { AdminGate } from "@/components/common/AdminAccess";
 
 export const Route = createFileRoute("/_site/admin")({
   head: () => ({
@@ -27,7 +28,7 @@ export const Route = createFileRoute("/_site/admin")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: AdminPage,
+  component: () => <AdminGate><AdminPage /></AdminGate>,
 });
 
 type QueueState = ModerationItem & { published?: boolean };
