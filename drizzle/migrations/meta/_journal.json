@@ -1,34 +1,5 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1792949749318,
-      "tag": "0000_username_accounts",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1792950878481,
-      "tag": "0001_lock_server_only_functions",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1793033700738,
-      "tag": "0002_private_messages",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1793122870908,
-      "tag": "0003_dm_delete_messages",
-      "breakpoints": true
-    }
-  ]
+  "entries": []
 }
