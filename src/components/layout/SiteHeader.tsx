@@ -9,6 +9,8 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { Gavel } from "lucide-react";
+import { useIsAdmin } from "@/components/common/AdminAccess";
 
 const NAV = [
   { to: "/feed", label: "الرئيسية", icon: Home },
@@ -26,16 +28,25 @@ export function SiteHeader() {
   const { user, ready } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { isAdmin } = useIsAdmin();
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/75 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
         <Logo />
         <nav className="hidden items-center gap-1 md:flex" aria-label="التنقل الرئيسي">
           {NAV.map((n) => (
-            <Link key={n.to} to={n.to} className={navLinkClass}>
-              <n.icon className="size-4" />
-              {n.label}
-            </Link>
+            <span key={n.to} className="contents">
+              <Link to={n.to} className={navLinkClass}>
+                <n.icon className="size-4" />
+                {n.label}
+              </Link>
+              {n.to === "/feed" && isAdmin && (
+                <Link to="/admin" className={navLinkClass}>
+                  <Gavel className="size-4" />
+                  لوحة الإشراف
+                </Link>
+              )}
+            </span>
           ))}
         </nav>
         <div className="ms-auto flex items-center gap-1.5">
@@ -79,13 +90,17 @@ const MOBILE = [
 ] as const;
 
 export function MobileNav() {
+  const { isAdmin } = useIsAdmin();
+  const items = isAdmin
+    ? [MOBILE[0], { to: "/admin", label: "الإشراف", icon: Gavel } as const, ...MOBILE.slice(1)]
+    : MOBILE;
   return (
     <nav
       aria-label="التنقل السفلي"
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
     >
-      <ul className="mx-auto grid max-w-md grid-cols-6">
-        {MOBILE.map((n) => (
+      <ul className={`mx-auto grid max-w-md ${isAdmin ? "grid-cols-7" : "grid-cols-6"}`}>
+        {items.map((n) => (
           <li key={n.to}>
             <Link
               to={n.to}
