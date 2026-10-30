@@ -1,0 +1,12 @@
+CREATE TABLE public.post_likes (content_id uuid NOT NULL REFERENCES public.publishing_content(id) ON DELETE CASCADE, user_id uuid NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY (content_id, user_id));
+CREATE TABLE public.post_comments (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), content_id uuid NOT NULL REFERENCES public.publishing_content(id) ON DELETE CASCADE, user_id uuid NOT NULL, username text NOT NULL, body text NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX post_comments_content_idx ON public.post_comments(content_id, created_at);
+CREATE TABLE public.follows (follower_id uuid NOT NULL, followee_id uuid NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY (follower_id, followee_id), CHECK (follower_id <> followee_id));
+GRANT SELECT ON public.post_likes, public.post_comments, public.follows TO anon, authenticated;
+GRANT ALL ON public.post_likes, public.post_comments, public.follows TO service_role;
+ALTER TABLE public.post_likes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.post_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.follows ENABLE ROW LEVEL SECURITY;
+CREATE POLICY likes_public_read ON public.post_likes FOR SELECT TO anon, authenticated USING (EXISTS (SELECT 1 FROM public.publishing_content c WHERE c.id = content_id AND c.status = 'published'));
+CREATE POLICY comments_public_read ON public.post_comments FOR SELECT TO anon, authenticated USING (EXISTS (SELECT 1 FROM public.publishing_content c WHERE c.id = content_id AND c.status = 'published'));
+CREATE POLICY follows_public_read ON public.follows FOR SELECT TO anon, authenticated USING (true);
