@@ -1,5 +1,6 @@
 import { CategoryChip, IntentBadge } from '@/components/common/Chips';
 import { AttachmentList } from '@/components/common/AttachmentList';
+import { PostSocial } from '@/components/feed/PostSocial';
 import { categoryBySlug, intentByKey } from '@/data/catalog';
 import type { ContentRecord } from '@/lib/publishing-rules';
 export function PublishedCard({content}:{content:ContentRecord}) {
@@ -9,5 +10,6 @@ export function PublishedCard({content}:{content:ContentRecord}) {
   <h2 className="mt-3 text-lg font-semibold">{content.title}</h2>
   <p className="mt-2 whitespace-pre-wrap break-words leading-relaxed text-muted-foreground">{content.body}</p>
   <AttachmentList attachments={content.attachments}/>
+  <PostSocial contentId={content.id}/>
  </article>;
 }

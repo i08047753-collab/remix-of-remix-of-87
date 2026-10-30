@@ -224,6 +224,85 @@ export type Database = {
           },
         ]
       }
+      follows: {
+        Row: {
+          created_at: string
+          followee_id: string
+          follower_id: string
+        }
+        Insert: {
+          created_at?: string
+          followee_id: string
+          follower_id: string
+        }
+        Update: {
+          created_at?: string
+          followee_id?: string
+          follower_id?: string
+        }
+        Relationships: []
+      }
+      post_comments: {
+        Row: {
+          body: string
+          content_id: string
+          created_at: string
+          id: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          body: string
+          content_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          body?: string
+          content_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "publishing_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_likes: {
+        Row: {
+          content_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "publishing_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       publishing_attempts: {
         Row: {
           created_at: string
