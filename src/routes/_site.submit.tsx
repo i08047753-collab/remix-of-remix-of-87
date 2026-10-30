@@ -159,7 +159,7 @@ function SubmitPage() {
               setError(null); setFiles([...files, ...added]);
             }} />
             <Button type="button" variant="outline" onClick={() => fileInput.current?.click()} disabled={busy || files.length >= MAX_ATTACHMENTS}><Paperclip />إرفاق ملفات</Button>
-            <p className="text-xs text-muted-foreground">JPG، PNG، WebP، PDF · حتى 3 ملفات · 5 MB لكل ملف</p>
+            <p className="text-xs text-muted-foreground">صور JPG، PNG، WebP · فيديو MP4، WebM · PDF · حتى 3 ملفات · 5 MB للصورة و20 MB للفيديو</p>
             <ul className="space-y-2">{files.map((f, i) => <li key={`${f.name}-${i}`} className="flex min-w-0 items-center gap-2 text-sm"><span className="min-w-0 flex-1 truncate">{f.name}</span><Button type="button" variant="ghost" size="icon" aria-label={`إزالة ${f.name}`} disabled={busy} onClick={() => setFiles(files.filter((_, n) => n !== i))}><X /></Button></li>)}</ul>
           </div>
 

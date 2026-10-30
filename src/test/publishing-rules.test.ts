@@ -10,3 +10,8 @@ describe('publishing safeguards',()=>{
  it('verifies file signatures and blocks active PDF actions',()=>{expect(validateFileBytes(new TextEncoder().encode('<script>bad</script>'),'image/png')).toBe(false);expect(validateFileBytes(new TextEncoder().encode('%PDF-1.7\n/JavaScript\n%%EOF'),'application/pdf')).toBe(false);expect(validateFileBytes(new TextEncoder().encode('%PDF-1.7\n%%EOF'),'application/pdf')).toBe(true);});
  it('validates post and article limits without accepting status or owner input',()=>{const base={kind:'article',title:'عنوان طويل',body:'a'.repeat(20000),category:'physics',intent:'answer',status:'published',owner_id:'forged'};const result=contentSchema.parse(base);expect('status' in result).toBe(false);expect('owner_id' in result).toBe(false);expect(contentSchema.safeParse({...base,body:'a'.repeat(20001)}).success).toBe(false);expect(contentSchema.safeParse({...base,kind:'post',body:'a'.repeat(2001)}).success).toBe(false);});
 });
+import { MAX_VIDEO_BYTES } from '@/lib/publishing-rules';
+describe('video attachments',()=>{
+ it('accepts MP4/WebM up to 20 MB and images stay at 5 MB',()=>{expect(MAX_VIDEO_BYTES).toBe(20971520);expect(validateFileMetadata({name:'v.mp4',type:'video/mp4',size:20971520})).toBeNull();expect(validateFileMetadata({name:'v.webm',type:'video/webm',size:20971521})).not.toBeNull();expect(validateFileMetadata({name:'i.png',type:'image/png',size:6000000})).not.toBeNull();});
+ it('checks MP4 signature',()=>{const b=new Uint8Array(32);b.set(new TextEncoder().encode('ftypisom'),4);expect(validateFileBytes(b,'video/mp4')).toBe(true);expect(validateFileBytes(new Uint8Array(32),'video/mp4')).toBe(false);});
+});
