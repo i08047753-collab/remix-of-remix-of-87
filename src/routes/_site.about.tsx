@@ -56,57 +56,6 @@ function AboutPage() {
           STORM WORLD مساحة علمية تجمع المهتمين بمختلف المجالات، من الفيزياء والفلك إلى الأحياء والكيمياء والرياضيات وغيرها. مكان نتبادل فيه الأفكار، ونطرح الأسئلة، ونتعلم من بعضنا.
         </p>
       </section>
-
-      {/* FOUNDER STORY */}
-      <section id="story" className="space-y-8">
-        <div className="text-center">
-          <p className="text-sm font-bold tracking-widest text-indigo-400">وراء المنصة حكاية</p>
-          <h2 className="mt-3 text-3xl font-black sm:text-4xl">17 محاولة... وعالم واحد</h2>
-        </div>
-
-        <div className="relative mx-auto max-w-3xl space-y-7 border-r-2 border-indigo-500/30 pr-6 sm:pr-9">
-          <article className="relative space-y-3">
-            <span className="absolute -right-[31px] top-1 size-3 rounded-full bg-indigo-400 ring-4 ring-background sm:-right-[43px]" />
-            <h3 className="text-xl font-bold">بدأت الحكاية بحزن</h3>
-            <p className="leading-8 text-muted-foreground">
-              لم يكن لدي أصدقاء كثيرون يشاركونني شغفي بالعلوم. ثم جلست بجانبي زميلة مهتمة بالعلوم وفروعها، وكانت تنظر إليّ وكأنني أعرف كل شيء، بينما كنت أشعر أنني لا أعرف سوى شحنة النيوترون!
-            </p>
-          </article>
-
-          <article className="relative space-y-3">
-            <span className="absolute -right-[31px] top-1 size-3 rounded-full bg-indigo-400 ring-4 ring-background sm:-right-[43px]" />
-            <h3 className="text-xl font-bold">فكرة جمعت الجميع</h3>
-            <p className="leading-8 text-muted-foreground">
-              بعد ذلك تعرفت على شخص آخر يحب الفيزياء، ثم آخرين واحدًا تلو الآخر. كان معظمهم لا يعرف بعضهم. عندها سألت نفسي: لماذا لا أجمعهم جميعًا في مكان واحد؟
-            </p>
-          </article>
-
-          <article className="relative space-y-3">
-            <span className="absolute -right-[31px] top-1 size-3 rounded-full bg-indigo-400 ring-4 ring-background sm:-right-[43px]" />
-            <h3 className="text-xl font-bold">بحثت عن المكان المناسب</h3>
-            <p className="leading-8 text-muted-foreground">
-              فكرت في Messenger وTelegram وWhatsApp، لكن لكل واحد منها ما لم يكن يناسب فكرتي. لذلك قررت، رغم خبرتي البرمجية البسيطة، أن أبني منصتي الخاصة.
-            </p>
-          </article>
-
-          <article className="relative space-y-3">
-            <span className="absolute -right-[31px] top-1 size-3 rounded-full bg-indigo-400 ring-4 ring-background sm:-right-[43px]" />
-            <h3 className="text-xl font-bold">من المحاولة الأولى إلى السابعة عشرة</h3>
-            <p className="leading-8 text-muted-foreground">
-              تزامن المشروع مع أسبوع الاختبارات، ولم يكن الوقت كافيًا. أعدت بناء المشروع مرات عديدة، واستعنت بالخبراء، وواصلت المحاولة رغم التعثر. وصلت إلى المحاولة السادسة عشرة دون النتيجة التي أريدها، ثم بدأت من جديد... حتى وصلت إلى النسخة السابعة عشرة.
-            </p>
-          </article>
-
-          <article className="relative space-y-3">
-            <span className="absolute -right-[31px] top-1 size-3 rounded-full bg-indigo-400 ring-4 ring-background sm:-right-[43px]" />
-            <h3 className="text-xl font-bold">وهنا بدأ STORM WORLD</h3>
-            <p className="leading-8 text-muted-foreground">
-              أضفت ميزات جديدة في كل محاولة، حتى أصبح المشروع عالمًا يضم المجتمع والمناقشات والفيديوهات والمقالات وأدوات المعرفة. لم أبنِ هذا العالم لأكون فيه وحدي، بل بنيته حتى لا يشعر محبّ العلم بأنه وحيد.
-            </p>
-          </article>
-        </div>
-      </section>
-
       {/* MESSAGE */}
       <section className="rounded-3xl border border-indigo-400/20 bg-indigo-500/5 px-6 py-12 text-center sm:px-12">
         <Heart className="mx-auto text-indigo-400" size={30} />
