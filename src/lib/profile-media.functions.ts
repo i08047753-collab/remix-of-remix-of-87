@@ -62,7 +62,7 @@ export const uploadProfileImage = createServerFn({ method: 'POST' })
     if (up.error) return { ok: false, error: 'تعذّر رفع الصورة، حاول مجدداً.' };
     const col = data.kind === 'avatar' ? 'avatar_path' : 'cover_path';
     const prev = await supabaseAdmin.from('profile_media').select(col).eq('user_id', context.userId).maybeSingle();
-    const save = await supabaseAdmin.from('profile_media').upsert({ user_id: context.userId, [col]: path, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+    const save = await supabaseAdmin.from('profile_media').upsert({ user_id: context.userId, ...(data.kind === 'avatar' ? { avatar_path: path } : { cover_path: path }), updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
     if (save.error) { await supabaseAdmin.storage.from(BUCKET).remove([path]); return { ok: false, error: 'تعذّر حفظ الصورة.' }; }
     const old = (prev.data as Record<string, string | null> | null)?.[col];
     if (old) await supabaseAdmin.storage.from(BUCKET).remove([old]);
@@ -81,7 +81,7 @@ export const removeProfileImage = createServerFn({ method: 'POST' })
     const prev = await supabaseAdmin.from('profile_media').select(col).eq('user_id', context.userId).maybeSingle();
     const old = (prev.data as Record<string, string | null> | null)?.[col];
     if (!old) return { ok: true };
-    await supabaseAdmin.from('profile_media').update({ [col]: null, updated_at: new Date().toISOString() }).eq('user_id', context.userId);
+    await supabaseAdmin.from('profile_media').update({ ...(data.kind === 'avatar' ? { avatar_path: null } : { cover_path: null }), updated_at: new Date().toISOString() }).eq('user_id', context.userId);
     await supabaseAdmin.storage.from(BUCKET).remove([old]);
     return { ok: true };
   });
