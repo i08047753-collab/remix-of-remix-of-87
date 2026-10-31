@@ -8,6 +8,13 @@
       "when": 1793344292679,
       "tag": "0000_social_interactions",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793434552657,
+      "tag": "0001_profile_media",
+      "breakpoints": true
     }
   ]
 }

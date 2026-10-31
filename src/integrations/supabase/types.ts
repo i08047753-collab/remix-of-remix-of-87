@@ -303,6 +303,27 @@ export type Database = {
           },
         ]
       }
+      profile_media: {
+        Row: {
+          avatar_path: string | null
+          cover_path: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_path?: string | null
+          cover_path?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_path?: string | null
+          cover_path?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       publishing_attempts: {
         Row: {
           created_at: string
