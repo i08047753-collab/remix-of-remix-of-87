@@ -67,7 +67,7 @@ function AboutPage() {
       </section>
 
       {/* CONTACT */}
-      <section className="space-y-8">
+      <section id="contact" className="space-y-8">
         <div className="text-center">
           <p className="text-sm font-bold tracking-widest text-indigo-400">نبقى على تواصل</p>
           <h2 className="mt-3 text-3xl font-black">تواصل معنا</h2>
