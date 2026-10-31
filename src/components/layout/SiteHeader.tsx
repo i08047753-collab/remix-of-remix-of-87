@@ -18,6 +18,7 @@ const NAV = [
   { to: "/chat", label: "الدردشة", icon: MessagesSquare },
   { to: "/messages", label: "الرسائل", icon: Mail },
   { to: "/rules", label: "قواعد المجتمع", icon: ShieldCheck },
+  { to: "/about", label: "عن المنصة", icon: Info },
 ] as const;
 
 const navLinkClass =
