@@ -8,6 +8,7 @@ import { PhysyAvatar } from "@/components/brand/Physy";
 import { Button } from "@/components/ui/button";
 import { memberByUsername, POSTS } from "@/data/sample";
 import { useBlocked, useProfile } from "@/lib/app-state";
+import { usePublicProfileMedia } from "@/components/profile/ProfileMediaEditor";
 
 export const Route = createFileRoute("/_site/u/$username")({
   head: ({ params }) => ({
@@ -29,6 +30,7 @@ function ProfilePage() {
   const [blocked] = useBlocked();
   const member = memberByUsername(username);
   const isMe = me?.username === username;
+  const { data: media } = usePublicProfileMedia(username);
 
   if (!member && !isMe) {
     return (
@@ -52,9 +54,9 @@ function ProfilePage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <section className="surface relative overflow-hidden p-6">
-        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-storm opacity-25" />
-        <div className="relative flex flex-col items-start gap-4 pt-6 sm:flex-row sm:items-end">
-          <MemberAvatar name={name} seed={username} className="size-20 text-3xl ring-4 ring-background" />
+        {media?.coverUrl ? <img src={media.coverUrl} alt="صورة الغلاف" className="absolute inset-x-0 top-0 h-32 w-full object-cover" /> : <div className="absolute inset-x-0 top-0 h-24 bg-gradient-storm opacity-25" />}
+        <div className="relative flex flex-col items-start gap-4 pt-16 sm:flex-row sm:items-end">
+          {media?.avatarUrl ? <img src={media.avatarUrl} alt={name} className="size-20 shrink-0 rounded-full object-cover ring-4 ring-background" /> : <MemberAvatar name={name} seed={username} className="size-20 text-3xl ring-4 ring-background" />}
           <div className="flex-1">
             <h1 className="flex items-center gap-2 text-2xl font-bold">
               {name}

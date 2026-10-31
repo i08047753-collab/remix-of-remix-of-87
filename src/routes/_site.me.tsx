@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { intentByKey } from "@/data/catalog";
 import { useProfile } from "@/lib/app-state";
+import { ProfileMediaEditor } from "@/components/profile/ProfileMediaEditor";
 
 export const Route = createFileRoute("/_site/me")({
   head: () => ({
@@ -45,6 +46,7 @@ function MePage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
+      <ProfileMediaEditor username={profile.username} />
       <section className="surface flex flex-col gap-4 p-6 sm:flex-row sm:items-center">
         <MemberAvatar name={profile.username} seed={profile.username} className="size-16 text-2xl" />
         <div className="flex-1">
