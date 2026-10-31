@@ -87,6 +87,7 @@ const MOBILE = [
   { to: "/submit", label: "اقترح", icon: PenSquare },
   { to: "/chat", label: "الدردشة", icon: MessagesSquare },
   { to: "/messages", label: "الرسائل", icon: Mail },
+  { to: "/about", label: "عن المنصة", icon: Info },
   { to: "/me", label: "حسابي", icon: UserRound },
 ] as const;
 
