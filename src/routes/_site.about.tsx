@@ -19,7 +19,7 @@ function AboutPage() {
       <section className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-[#080d1b] text-center">
         <video
           className="absolute inset-0 -z-10 h-full w-full object-cover opacity-50"
-          src={`${import.meta.env.BASE_URL}storm-intro.mp4`}
+          src={`${import.meta.env.BASE_URL}storm-world-whiteboard.mp4`}
           autoPlay
           muted
           loop
