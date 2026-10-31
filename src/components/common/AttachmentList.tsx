@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Download } from 'lucide-react';
+import { BookOpen, Download, ExternalLink, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Attachment } from '@/lib/publishing-rules';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ type Urls = Record<string, { view: string; download: string }>;
 export function AttachmentList({ attachments }: { attachments: Attachment[] }) {
   const [urls, setUrls] = useState<Urls>({});
   const [zoom, setZoom] = useState<Attachment | null>(null);
+  const [reading, setReading] = useState<Attachment | null>(null);
   useEffect(() => {
     let active = true;
     setUrls({});
@@ -39,12 +40,39 @@ export function AttachmentList({ attachments }: { attachments: Attachment[] }) {
         </div>
       )}
       {files.length > 0 && (
-        <ul className="flex flex-wrap gap-2">{files.map(a => <li key={a.path} className="min-w-0 max-w-full"><Button asChild variant="outline" size="sm" disabled={!urls[a.path]}><a href={urls[a.path]?.download || undefined} target="_blank" rel="noopener noreferrer" className="max-w-full"><Download className="shrink-0" /><span className="truncate">{a.name}</span></a></Button></li>)}</ul>
+        <ul className="space-y-2">{files.map(a => {
+          const u = urls[a.path];
+          return (
+            <li key={a.path} className="flex flex-wrap items-center gap-3 rounded-xl border bg-card p-3">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive"><FileText className="size-6" /></div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium">{a.name}</p>
+                <p className="text-xs text-muted-foreground">PDF · {(a.size / 1024 / 1024).toFixed(1)} MB</p>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" disabled={!u} onClick={() => setReading(a)}><BookOpen />قراءة المقال</Button>
+                <Button asChild variant="outline" size="sm" disabled={!u}><a href={u?.download || undefined} target="_blank" rel="noopener noreferrer" aria-label={`تحميل ${a.name}`}><Download /></a></Button>
+              </div>
+            </li>
+          );
+        })}</ul>
       )}
       <Dialog open={!!zoom} onOpenChange={o => !o && setZoom(null)}>
         <DialogContent className="max-w-4xl p-2">
           <DialogTitle className="sr-only">{zoom?.name}</DialogTitle>
           {zoom && <img src={urls[zoom.path]?.view} alt={zoom.name} className="max-h-[85vh] w-full rounded-lg object-contain" />}
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!reading} onOpenChange={o => !o && setReading(null)}>
+        <DialogContent className="flex h-[92vh] max-w-5xl flex-col gap-2 p-3">
+          <DialogTitle className="truncate pe-8 text-base">{reading?.name}</DialogTitle>
+          {reading && <>
+            <iframe src={urls[reading.path]?.view} title={reading.name} className="min-h-0 w-full flex-1 rounded-lg border bg-muted" />
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button asChild variant="outline" size="sm"><a href={urls[reading.path]?.view} target="_blank" rel="noopener noreferrer"><ExternalLink />فتح في صفحة كاملة</a></Button>
+              <Button asChild variant="outline" size="sm"><a href={urls[reading.path]?.download} target="_blank" rel="noopener noreferrer"><Download />تحميل</a></Button>
+            </div>
+          </>}
         </DialogContent>
       </Dialog>
     </div>
