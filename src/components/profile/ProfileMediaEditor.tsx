@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { MemberAvatar } from '@/components/common/MemberAvatar';
 import { useAuth } from '@/lib/auth-context';
-import { getMyProfileMedia, removeProfileImage, uploadProfileImage } from '@/lib/profile-media.functions';
+import { getMyProfileMedia, getProfileMedia, removeProfileImage, uploadProfileImage } from '@/lib/profile-media.functions';
 
 type Kind = 'avatar' | 'cover';
 
@@ -83,8 +83,6 @@ export function ProfileMediaEditor({ username }: { username: string }) {
 }
 
 export function usePublicProfileMedia(username: string) {
-  const { getProfileMedia } = useFns();
-  return useQuery({ queryKey: ['profile-media', 'public', username], queryFn: () => getProfileMedia({ data: { username } }), staleTime: 5 * 60_000 });
+  const fetchMedia = useServerFn(getProfileMedia);
+  return useQuery({ queryKey: ['profile-media', 'public', username], queryFn: () => fetchMedia({ data: { username } }), staleTime: 5 * 60_000 });
 }
-import { getProfileMedia as gpm } from '@/lib/profile-media.functions';
-function useFns() { return { getProfileMedia: useServerFn(gpm) }; }
