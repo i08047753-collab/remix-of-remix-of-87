@@ -1,7 +1,7 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Mail, Send, Rocket, Sparkles, Heart } from "lucide-react";
+import { Mail, Send, Rocket, Heart } from "lucide-react";
 
 export const Route = createFileRoute("/_site/about")({
   component: AboutPage,
@@ -15,39 +15,39 @@ function AboutPage() {
   return (
     <div dir="rtl" className="space-y-16 pb-12 text-foreground">
 
-      {/* CINEMATIC INTRO */}
-      <section className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-[#080d1b] text-center">
-        <video
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-50"
-          src={`${import.meta.env.BASE_URL}storm-world-whiteboard.mp4`}
-          autoPlay
-          muted
-          loop
-          playsInline
-          controls
-        />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#080d1b]/40 via-[#080d1b]/70 to-[#080d1b]" />
+     {/* CINEMATIC INTRO */}
+<section className="overflow-hidden rounded-3xl border border-white/10 bg-[#080d1b] text-center">
+  <div className="px-6 py-16 sm:px-12">
+    <div className="mx-auto flex size-16 items-center justify-center rounded-2xl border border-indigo-400/30 bg-indigo-500/20 text-indigo-300">
+      <Rocket size={32} />
+    </div>
 
-        <div className="relative px-6 py-24 sm:px-12">
-          <div className="mx-auto flex size-16 items-center justify-center rounded-2xl border border-indigo-400/30 bg-indigo-500/20 text-indigo-300">
-            <Rocket size={32} />
-          </div>
-          <p className="mt-6 text-sm font-bold tracking-[0.25em] text-indigo-300">STORM WORLD</p>
-          <h1 className="mt-4 text-4xl font-black leading-tight sm:text-6xl">
-            من هنا تبدأ رحلة
-            <span className="block bg-gradient-to-l from-indigo-300 to-cyan-300 bg-clip-text text-transparent">
-              اكتشاف المجهول
-            </span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-200 sm:text-lg">
-            لم نُنشئ هذه المنصة لمجرد نشر المعلومات، بل لنجمع العقول التي تحب السؤال والبحث والاكتشاف.
-          </p>
-          <a href="#story" className="mt-9 inline-flex items-center gap-2 rounded-xl bg-indigo-500 px-6 py-3 font-bold text-white transition hover:bg-indigo-400">
-            اكتشف قصتنا <Sparkles size={18} />
-          </a>
-        </div>
-      </section>
+    <p className="mt-6 text-sm font-bold tracking-[0.25em] text-indigo-300">
+      STORM WORLD
+    </p>
 
+    <h1 className="mt-4 text-4xl font-black leading-tight sm:text-6xl">
+      من هنا تبدأ رحلة
+      <span className="block bg-gradient-to-l from-indigo-300 to-cyan-300 bg-clip-text text-transparent">
+        اكتشاف المجهول
+      </span>
+    </h1>
+
+    <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-200 sm:text-lg">
+      لم نُنشئ هذه المنصة لمجرد نشر المعلومات، بل لنجمع العقول التي تحب السؤال والبحث والاكتشاف.
+    </p>
+  </div>
+
+  <div className="mx-auto w-full max-w-4xl px-4 pb-10">
+    <video
+      className="w-full rounded-2xl border border-white/10"
+      src={`${import.meta.env.BASE_URL}storm-world-whiteboard.mp4`}
+      controls
+      playsInline
+      preload="metadata"
+    />
+  </div>
+</section>
       {/* ABOUT */}
       <section className="mx-auto max-w-4xl space-y-5 text-center">
         <p className="text-sm font-bold tracking-widest text-indigo-400">من نحن؟</p>
