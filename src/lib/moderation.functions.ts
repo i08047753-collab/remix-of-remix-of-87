@@ -43,6 +43,20 @@ export const closeReport = createServerFn({ method: 'POST' })
     return { ok: true };
   });
 
+export const deletePostByAdmin = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { contentId: string; reportId?: string }) => input)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { error } = await supabaseAdmin.from('publishing_content').delete().eq('id', data.contentId);
+    if (error) throw new Error('تعذّر حذف المنشور.');
+    if (data.reportId) {
+      await supabaseAdmin.from('content_reports').update({ status: 'actioned' }).eq('id', data.reportId);
+    }
+    return { ok: true };
+  });
+
 export const listMembers = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
