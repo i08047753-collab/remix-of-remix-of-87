@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SiteRouteImport } from './routes/_site'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as SiteAboutRouteImport } from './routes/_site.about'
 import { Route as SiteAdminRouteImport } from './routes/_site.admin'
 import { Route as SiteChatRouteImport } from './routes/_site.chat'
 import { Route as SiteExploreRouteImport } from './routes/_site.explore'
@@ -45,6 +46,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SiteAboutRoute = SiteAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => SiteRoute,
 } as any)
 const SiteAdminRoute = SiteAdminRouteImport.update({
   id: '/admin',
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/onboarding': typeof OnboardingRoute
+  '/about': typeof SiteAboutRoute
   '/admin': typeof SiteAdminRoute
   '/chat': typeof SiteChatRoute
   '/explore': typeof SiteExploreRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/onboarding': typeof OnboardingRoute
+  '/about': typeof SiteAboutRoute
   '/admin': typeof SiteAdminRoute
   '/chat': typeof SiteChatRoute
   '/explore': typeof SiteExploreRoute
@@ -154,6 +162,7 @@ export interface FileRoutesById {
   '/_site': typeof SiteRouteWithChildren
   '/auth': typeof AuthRoute
   '/onboarding': typeof OnboardingRoute
+  '/_site/about': typeof SiteAboutRoute
   '/_site/admin': typeof SiteAdminRoute
   '/_site/chat': typeof SiteChatRoute
   '/_site/explore': typeof SiteExploreRoute
@@ -174,6 +183,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/onboarding'
+    | '/about'
     | '/admin'
     | '/chat'
     | '/explore'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/onboarding'
+    | '/about'
     | '/admin'
     | '/chat'
     | '/explore'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/_site'
     | '/auth'
     | '/onboarding'
+    | '/_site/about'
     | '/_site/admin'
     | '/_site/chat'
     | '/_site/explore'
@@ -262,6 +274,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_site/about': {
+      id: '/_site/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof SiteAboutRouteImport
+      parentRoute: typeof SiteRoute
     }
     '/_site/admin': {
       id: '/_site/admin'
@@ -358,6 +377,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface SiteRouteChildren {
+  SiteAboutRoute: typeof SiteAboutRoute
   SiteAdminRoute: typeof SiteAdminRoute
   SiteChatRoute: typeof SiteChatRoute
   SiteExploreRoute: typeof SiteExploreRoute
@@ -374,6 +394,7 @@ interface SiteRouteChildren {
 }
 
 const SiteRouteChildren: SiteRouteChildren = {
+  SiteAboutRoute: SiteAboutRoute,
   SiteAdminRoute: SiteAdminRoute,
   SiteChatRoute: SiteChatRoute,
   SiteExploreRoute: SiteExploreRoute,
