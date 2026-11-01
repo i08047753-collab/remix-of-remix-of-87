@@ -152,7 +152,7 @@ function AdminPage() {
                     <tr key={m.username} className="hover:bg-accent/50">
                       <td className="p-3">
                         <div className="flex items-center gap-2">
-                          <MemberAvatar username={m.username} size="sm" />
+                         <MemberAvatar name={m.username} seed={m.username} className="size-8 text-sm" />
                           <span className="font-semibold text-foreground">@{m.username}</span>
                         </div>
                       </td>
