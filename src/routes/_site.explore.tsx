@@ -1,98 +1,108 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { Hash, Search } from "lucide-react";
+import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
-import { PostCard } from "@/components/feed/PostCard";
 import { MemberAvatar } from "@/components/common/MemberAvatar";
 import { PhysyAvatar } from "@/components/brand/Physy";
+import { PublishedCard } from "@/components/feed/PublishedCard";
 import { CATEGORIES } from "@/data/catalog";
-import { MEMBERS, POSTS } from "@/data/sample";
-import { useBlocked } from "@/lib/app-state";
+import { listPublishedContent } from "@/lib/publishing.functions";
+import { searchMembers } from "@/lib/social.functions";
+import { extractHashtags, normalizeTag, popularTags } from "@/lib/hashtags";
+
+const publishedOptions = queryOptions({ queryKey: ["published-content"], queryFn: () => listPublishedContent() });
 
 export const Route = createFileRoute("/_site/explore")({
+  validateSearch: (s: Record<string, unknown>): { q?: string } => (typeof s["q"] === "string" && s["q"] ? { q: s["q"].slice(0, 80) } : {}),
+  loader: ({ context }) => context.queryClient.ensureQueryData(publishedOptions),
   head: () => ({
     meta: [
-      { title: "استكشف المجالات والأعضاء — STORM WORLD" },
-      { name: "description", content: "ابحث في منشورات STORM WORLD وتصفح 11 مجالاً علمياً وتعرّف على أعضاء يشاركونك الشغف." },
+      { title: "استكشف المنشورات والوسوم والأعضاء — STORM WORLD" },
+      { name: "description", content: "ابحث في منشورات STORM WORLD وتصفح الوسوم الرائجة والمجالات العلمية وتعرّف على الأعضاء." },
       { property: "og:title", content: "استكشف STORM WORLD" },
-      { property: "og:description", content: "ابحث في المجالات العلمية والمنشورات والأعضاء." },
+      { property: "og:description", content: "ابحث في المنشورات والوسوم والأعضاء." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
   }),
+  errorComponent: () => <p className="text-center text-muted-foreground">تعذّر تحميل نتائج البحث.</p>,
+  notFoundComponent: () => <p className="text-center text-muted-foreground">لا شيء هنا.</p>,
   component: Explore,
 });
 
-const norm = (s: string) => s.toLowerCase().replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي");
+const norm = (s: string) => normalizeTag(s);
 
 function Explore() {
-  const [q, setQ] = useState("");
-  const [blocked] = useBlocked();
-  const query = norm(q.trim());
+  const { q: urlQ = "" } = Route.useSearch();
+  const navigate = useNavigate({ from: "/explore" });
+  const [q, setQ] = useState(urlQ);
+  useEffect(() => setQ(urlQ), [urlQ]);
+  useEffect(() => {
+    const t = setTimeout(() => { if (q !== urlQ) navigate({ search: q.trim() ? { q } : {}, replace: true }); }, 300);
+    return () => clearTimeout(t);
+  }, [q, urlQ, navigate]);
 
+  const { data: posts } = useSuspenseQuery(publishedOptions);
+  const trimmed = urlQ.trim();
+  const isTag = trimmed.startsWith("#");
+  const query = norm(trimmed);
+
+  const tags = useMemo(() => popularTags(posts.map((p) => p.title + " " + p.body)), [posts]);
   const results = useMemo(() => {
     if (!query) return null;
     return {
-      categories: CATEGORIES.filter((c) => norm(c.name + c.blurb + c.slug).includes(query)),
-      members: MEMBERS.filter((m) => !blocked.includes(m.username) && norm(m.name + m.username + m.bio).includes(query)),
-      posts: POSTS.filter((p) => !blocked.includes(p.author) && norm(p.title + p.body).includes(query)),
+      categories: isTag ? [] : CATEGORIES.filter((c) => norm(c.name + c.blurb + c.slug).includes(query)),
+      posts: posts.filter((p) => isTag ? extractHashtags(p.title + " " + p.body).includes(query) : norm(p.title + " " + p.body).includes(query)),
     };
-  }, [query, blocked]);
+  }, [query, isTag, posts]);
 
-  const empty = results && !results.categories.length && !results.members.length && !results.posts.length;
+  const members = useQuery({
+    queryKey: ["member-search", query],
+    queryFn: () => searchMembers({ data: { q: query } }),
+    enabled: !!query && !isTag,
+  });
+  const memberList = members.data ?? [];
+  const empty = results && !results.categories.length && !results.posts.length && !memberList.length && !members.isFetching;
 
   return (
     <div className="space-y-8">
       <div className="text-center">
         <h1 className="text-3xl font-bold">استكشف</h1>
-        <p className="mt-1 text-muted-foreground">ابحث عن سؤال، مجال، أو صديق جديد</p>
+        <p className="mt-1 text-muted-foreground">ابحث عن منشور، وسم، مجال، أو عضو</p>
         <div className="relative mx-auto mt-5 max-w-xl">
           <Search className="pointer-events-none absolute inset-y-0 start-4 my-auto size-5 text-muted-foreground" />
-          <Input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="جرّب: المشتري، روبوت، بايثون…"
-            className="h-12 rounded-2xl ps-12 text-base"
-            aria-label="البحث"
-          />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="جرّب: #فيزياء، روبوت، @اسم…" className="h-12 rounded-2xl ps-12 text-base" aria-label="البحث" />
         </div>
       </div>
 
+      {!!tags.length && (
+        <section>
+          <h2 className="mb-3 font-semibold">الوسوم الرائجة</h2>
+          <div className="flex flex-wrap gap-2">
+            {tags.map((t) => (
+              <Link key={t.tag} to="/explore" search={{ q: "#" + t.tag }} className={"inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm " + (isTag && query === t.tag ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground")}>
+                <Hash className="size-3.5" />{t.tag}<span className="opacity-70">· {t.count}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       {!results && (
-        <>
-          <section>
-            <h2 className="mb-4 text-xl font-semibold">المجالات العلمية</h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {CATEGORIES.map((c) => {
-                const count = POSTS.filter((p) => p.category === c.slug).length;
-                return (
-                  <Link
-                    key={c.slug}
-                    to="/feed"
-                    search={{ topic: c.slug }}
-                    className="surface group p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40"
-                  >
-                    <span className="grid size-11 place-items-center rounded-xl bg-accent text-accent-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                      <c.icon className="size-5" />
-                    </span>
-                    <p className="mt-3 font-semibold">{c.name}</p>
-                    <p className="text-xs text-muted-foreground">{c.blurb}</p>
-                    <p className="mt-2 text-xs text-primary">{count} منشور</p>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-          <section>
-            <h2 className="mb-4 text-xl font-semibold">أعضاء المجتمع</h2>
-            {MEMBERS.length === 0 && <p className="text-sm text-muted-foreground">لا توجد ملفات أعضاء متاحة حالياً.</p>}
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {MEMBERS.filter((m) => !blocked.includes(m.username)).map((m) => (
-                <MemberRow key={m.username} m={m} />
-              ))}
-            </div>
-          </section>
-        </>
+        <section>
+          <h2 className="mb-4 text-xl font-semibold">المجالات العلمية</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {CATEGORIES.map((c) => (
+              <Link key={c.slug} to="/feed" search={{ topic: c.slug }} className="surface group p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40">
+                <span className="grid size-11 place-items-center rounded-xl bg-accent text-accent-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground"><c.icon className="size-5" /></span>
+                <p className="mt-3 font-semibold">{c.name}</p>
+                <p className="text-xs text-muted-foreground">{c.blurb}</p>
+                <p className="mt-2 text-xs text-primary">{posts.filter((p) => p.category === c.slug).length} منشور</p>
+              </Link>
+            ))}
+          </div>
+        </section>
       )}
 
       {results && (
@@ -101,7 +111,7 @@ function Explore() {
             <div className="flex flex-col items-center py-10 text-center">
               <PhysyAvatar className="size-24" />
               <p className="mt-3 font-semibold">لم أجد شيئاً بهذا الاسم</p>
-              <p className="text-sm text-muted-foreground">جرّب كلمة أخرى أو اقترح منشوراً عن الموضوع.</p>
+              <p className="text-sm text-muted-foreground">جرّب كلمة أو وسماً آخر.</p>
             </div>
           )}
           {!!results.categories.length && (
@@ -109,46 +119,32 @@ function Explore() {
               <h2 className="mb-3 font-semibold">المجالات</h2>
               <div className="flex flex-wrap gap-2">
                 {results.categories.map((c) => (
-                  <Link key={c.slug} to="/feed" search={{ topic: c.slug }} className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm text-accent-foreground">
-                    <c.icon className="size-4" />
-                    {c.name}
-                  </Link>
+                  <Link key={c.slug} to="/feed" search={{ topic: c.slug }} className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm text-accent-foreground"><c.icon className="size-4" />{c.name}</Link>
                 ))}
               </div>
             </section>
           )}
-          {!!results.members.length && (
+          {!!memberList.length && (
             <section>
               <h2 className="mb-3 font-semibold">الأعضاء</h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {results.members.map((m) => (
-                  <MemberRow key={m.username} m={m} />
+                {memberList.map((m) => (
+                  <Link key={m.username} to="/u/$username" params={{ username: m.username }} className="surface flex items-center gap-3 p-4 transition-colors hover:border-primary/40">
+                    <MemberAvatar name={m.username} seed={m.username} />
+                    <bdi dir="ltr" className="font-medium">@{m.username}</bdi>
+                  </Link>
                 ))}
               </div>
             </section>
           )}
           {!!results.posts.length && (
             <section className="space-y-4">
-              <h2 className="font-semibold">المنشورات</h2>
-              {results.posts.map((p, i) => (
-                <PostCard key={p.id} post={p} index={i} />
-              ))}
+              <h2 className="font-semibold">{isTag ? `منشورات #${query}` : "المنشورات"}</h2>
+              {results.posts.map((p) => <PublishedCard key={p.id} content={p} />)}
             </section>
           )}
         </div>
       )}
     </div>
-  );
-}
-
-function MemberRow({ m }: { m: (typeof MEMBERS)[number] }) {
-  return (
-    <Link to="/u/$username" params={{ username: m.username }} className="surface flex items-center gap-3 p-4 transition-colors hover:border-primary/40">
-      <MemberAvatar name={m.name} seed={m.username} />
-      <div className="min-w-0">
-        <p className="font-medium">{m.name}</p>
-        <p className="line-clamp-1 text-xs text-muted-foreground">{m.bio}</p>
-      </div>
-    </Link>
   );
 }

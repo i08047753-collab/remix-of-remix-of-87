@@ -61,3 +61,13 @@ export const toggleFollow = createServerFn({ method: 'POST' }).middleware([requi
     else await db.from('follows').insert({ follower_id: context.userId, followee_id: data.userId });
     return { following: !row };
   });
+
+export const searchMembers = createServerFn({ method: 'POST' })
+  .inputValidator((d: unknown) => z.object({ q: z.string().trim().min(1).max(40) }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const q = data.q.replace(/^@/, '').replace(/[%_\\,()]/g, '');
+    if (!q) return [] as { username: string }[];
+    const { data: rows } = await supabaseAdmin.from('account_usernames').select('username').ilike('username', `%${q}%`).limit(12);
+    return (rows ?? []).map(r => ({ username: r.username }));
+  });
