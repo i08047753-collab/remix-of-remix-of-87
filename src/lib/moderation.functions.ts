@@ -23,7 +23,9 @@ export const submitReport = createServerFn({ method: 'POST' })
     const { error } = await supabaseAdmin.from('content_reports').insert({ reporter_id: context.userId, target_label: data.targetLabel, target_username: data.targetUsername || null, reason: data.reason, note: data.note });
     if (error) throw new Error('تعذّر إرسال البلاغ');
     return { ok: true };
- export const listReports = createServerFn({ method: 'GET' })
+  });
+
+export const listReports = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
