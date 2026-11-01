@@ -83,7 +83,16 @@ function AboutPage() {
             </div>
           </div>
 
-          <form onSubmit={(e) => { e.preventDefault(); alert("واجهة التواصل جاهزة، لكن إرسال الرسائل يحتاج إلى ربطها بخدمة خلفية."); }}>
+          <form onSubmit={(e) => {
+  e.preventDefault();
+
+  const subject = encodeURIComponent("رسالة جديدة من STORM WORLD");
+  const body = encodeURIComponent(
+    `الاسم: ${name}\nالبريد الإلكتروني: ${email || "غير محدد"}\n\nالرسالة:\n${message}`
+  );
+
+  window.location.href = `mailto:younesstorm989@gmail.com?subject=${subject}&body=${body}`;
+}}>
             <label className="mb-2 block text-sm font-semibold">اسمك</label>
             <input value={name} onChange={(e) => setName(e.target.value)} required placeholder="اكتب اسمك" className="mb-5 w-full rounded-xl border border-border bg-background px-4 py-3 outline-none focus:border-indigo-400" />
 
@@ -97,10 +106,9 @@ function AboutPage() {
               إرسال الرسالة <Send size={18} />
             </button>
           </form>
-
-          <p className="mt-4 text-xs leading-6 text-muted-foreground">
-            ملاحظة: نموذج التواصل يحتاج إلى ربط بخدمة خلفية حتى تصل الرسائل فعليًا إلى الإدارة.
-          </p>
+<p className="mt-4 text-xs leading-6 text-muted-foreground">
+  عند الضغط على إرسال الرسالة، سيفتح تطبيق البريد الإلكتروني لإرسال رسالتك إلى الإدارة.
+</p>
         </div>
       </section>
 
