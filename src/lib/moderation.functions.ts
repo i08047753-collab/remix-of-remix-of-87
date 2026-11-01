@@ -12,7 +12,7 @@ export const submitReport = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => {
     const v = (input ?? {}) as Record<string, unknown>;
-    const r = { targetLabel: text(v.targetLabel, 200), targetUsername: text(v.targetUsername, 40), reason: text(v.reason, 120), note: text(v.note, 300) };
+    const r = { targetLabel: text(v['targetLabel'], 200), targetUsername: text(v['targetUsername'], 40), reason: text(v['reason'], 120), note: text(v['note'], 300) };
     if (!r.targetLabel || !r.reason) throw new Error('بيانات البلاغ غير مكتملة');
     return r;
   })
