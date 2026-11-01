@@ -130,6 +130,39 @@ export type Database = {
         }
         Relationships: []
       }
+      content_reports: {
+        Row: {
+          created_at: string
+          id: string
+          note: string
+          reason: string
+          reporter_id: string
+          status: string
+          target_label: string
+          target_username: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string
+          reason: string
+          reporter_id: string
+          status?: string
+          target_label: string
+          target_username?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string
+          reason?: string
+          reporter_id?: string
+          status?: string
+          target_label?: string
+          target_username?: string | null
+        }
+        Relationships: []
+      }
       dm_conversations: {
         Row: {
           created_at: string
