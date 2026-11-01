@@ -23,17 +23,15 @@ export const submitReport = createServerFn({ method: 'POST' })
     const { error } = await supabaseAdmin.from('content_reports').insert({ reporter_id: context.userId, target_label: data.targetLabel, target_username: data.targetUsername || null, reason: data.reason, note: data.note });
     if (error) throw new Error('تعذّر إرسال البلاغ');
     return { ok: true };
-  });
-
-export const listReports = createServerFn({ method: 'GET' })
+ export const listReports = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
-    // جلب البلاغات المعلقة والنشطة فقط
-    const { data } = await context.supabase
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data } = await supabaseAdmin
       .from('content_reports')
       .select('*')
-      .eq('status', 'pending')
+      .in('status', ['open', 'pending'])
       .order('created_at', { ascending: false })
       .limit(100);
     return data ?? [];
