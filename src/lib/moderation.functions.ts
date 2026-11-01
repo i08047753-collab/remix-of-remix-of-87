@@ -29,7 +29,13 @@ export const listReports = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { data } = await context.supabase.from('content_reports').select('*').order('created_at', { ascending: false }).limit(100);
+    // جلب البلاغات المعلقة والنشطة فقط
+    const { data } = await context.supabase
+      .from('content_reports')
+      .select('*')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      .limit(100);
     return data ?? [];
   });
 
@@ -51,9 +57,17 @@ export const deletePostByAdmin = createServerFn({ method: 'POST' })
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const { error } = await supabaseAdmin.from('publishing_content').delete().eq('id', data.contentId);
     if (error) throw new Error('تعذّر حذف المنشور.');
+    
+    // إغلاق البلاغ المحدد إن وُجد
     if (data.reportId) {
       await supabaseAdmin.from('content_reports').update({ status: 'actioned' }).eq('id', data.reportId);
     }
+    // وإغلاق أي بلاغ آخر يخص هذا المنشور تلقائياً
+    await supabaseAdmin
+      .from('content_reports')
+      .update({ status: 'actioned' })
+      .ilike('target_label', `%[post:${data.contentId}]%`);
+
     return { ok: true };
   });
 
