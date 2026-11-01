@@ -88,7 +88,6 @@ const MOBILE = [
   { to: "/chat", label: "الدردشة", icon: MessagesSquare },
   { to: "/messages", label: "الرسائل", icon: Mail },
   { to: "/about", label: "عن المنصة", icon: Info },
-  { to: "/me", label: "حسابي", icon: UserRound },
 ] as const;
 
 export function MobileNav() {
@@ -99,14 +98,14 @@ export function MobileNav() {
   return (
     <nav
       aria-label="التنقل السفلي"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[max(env(safe-area-inset-bottom),0px)] backdrop-blur-xl md:hidden"
     >
       <ul className={`mx-auto grid max-w-md ${isAdmin ? "grid-cols-7" : "grid-cols-6"}`}>
         {items.map((n) => (
           <li key={n.to}>
             <Link
               to={n.to}
-              className="flex flex-col items-center gap-1 py-2.5 text-[0.7rem] text-muted-foreground data-[status=active]:text-primary"
+              className="flex flex-col items-center gap-0.5 pb-1 pt-1.5 text-[0.65rem] text-muted-foreground data-[status=active]:text-primary"
             >
               <n.icon className="size-5" />
               {n.label}

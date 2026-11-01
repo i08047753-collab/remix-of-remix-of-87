@@ -89,7 +89,7 @@ export function DirectMessages({ activeId }: { activeId?: string | undefined }) 
 function Shell({ children }: { children: React.ReactNode }) {
   return <div className="mx-auto max-w-5xl">
     <h1 className="mb-5 text-2xl font-bold sm:text-3xl">الرسائل</h1>
-    <section aria-label="الرسائل الخاصة" className="grid h-[calc(100dvh-14rem)] min-h-[440px] max-h-[860px] overflow-hidden rounded-2xl border border-border bg-card/80 shadow-card md:h-[calc(100dvh-13rem)] md:grid-cols-[320px_minmax(0,1fr)]">
+    <section aria-label="الرسائل الخاصة" className="grid h-[calc(100dvh-9.5rem)] min-h-[360px] sm:h-[calc(100dvh-14rem)] max-h-[860px] overflow-hidden rounded-2xl border border-border bg-card/80 shadow-card md:h-[calc(100dvh-13rem)] md:grid-cols-[320px_minmax(0,1fr)]">
       {children}
     </section>
   </div>;
