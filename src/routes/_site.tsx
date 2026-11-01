@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_site")({
 
 function SiteLayout() {
   return (
-    <div className="min-h-dvh pb-20 md:pb-0">
+    <div className="min-h-dvh pb-14 md:pb-0">
       <SiteHeader />
       <main className="mx-auto max-w-6xl px-4 py-6 md:py-8">
         <Outlet />

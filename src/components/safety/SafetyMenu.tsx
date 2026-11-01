@@ -20,6 +20,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useBlocked } from "@/lib/app-state";
+import { useServerFn } from "@tanstack/react-start";
+import { useAuth } from "@/lib/auth-context";
+import { submitReport } from "@/lib/moderation.functions";
 
 const REASONS = [
   "كلام غير محترم أو تنمّر",
@@ -33,13 +36,18 @@ export function ReportDialog({
   open,
   onOpenChange,
   targetLabel,
+  username,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   targetLabel: string;
+  username?: string;
 }) {
   const [reason, setReason] = useState<string>(REASONS[0] ?? "");
   const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+  const { user } = useAuth();
+  const report = useServerFn(submitReport);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -72,12 +80,18 @@ export function ReportDialog({
           </Button>
           <Button
             variant="destructive"
-            onClick={() => {
-              onOpenChange(false);
-              setNote("");
-              toast("شكلُ البلاغ جاهز", {
-                description: "في هذه النسخة التجريبية لا يُرسل البلاغ لأي أحد بعد.",
-              });
+            disabled={busy}
+            onClick={async () => {
+              if (!user) { toast("سجّل دخولك لإرسال بلاغ"); return; }
+              setBusy(true);
+              try {
+                await report({ data: { targetLabel, targetUsername: username ?? "", reason, note } });
+                onOpenChange(false);
+                setNote("");
+                toast("تم إرسال البلاغ للإشراف ✅");
+              } catch (e) {
+                toast(e instanceof Error ? e.message : "تعذّر إرسال البلاغ");
+              } finally { setBusy(false); }
             }}
           >
             <Flag />
